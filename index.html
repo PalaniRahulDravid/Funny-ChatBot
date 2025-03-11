@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <img src="https://cdn-icons-png.flaticon.com/512/14/14558.png" alt="Chatbot" class="chat-icon">
+            <span>Chatbot</span>
+            <button onclick="toggleTheme()">🌙</button>
+        </div>
+        <div class="chat-box" id="chatBox"></div>
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="Type a message...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+
+                    <!-- js section  -->   
+
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+        }
+
+        async function sendMessage() {
+            let input = document.getElementById("userInput");
+            let message = input.value.trim();
+            let chatBox = document.getElementById("chatBox");
+
+            if (message === "") return;
+
+            let userMsg = document.createElement("div");
+            userMsg.className = "user-message";
+            userMsg.textContent = message;
+            userMsg.style.animation = "fadeIn 0.5s ease-in-out";
+            chatBox.appendChild(userMsg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            input.value = "";
+
+            setTimeout(() => {
+                let typingIndicator = document.createElement("div");
+                typingIndicator.className = "bot-message typing";
+                typingIndicator.textContent = "Typing...";
+                chatBox.appendChild(typingIndicator);
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+                setTimeout(async () => {
+                    try {
+                        let response = await fetch('http://localhost:5000/chat', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ message })
+                        });
+
+                        let data = await response.json();
+
+                        chatBox.removeChild(typingIndicator);
+
+                        let botMsg = document.createElement("div");
+                        botMsg.className = "bot-message";
+                        botMsg.textContent = data.reply;
+                        botMsg.style.animation = "fadeIn 0.5s ease-in-out";
+                        chatBox.appendChild(botMsg);
+
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                    } catch (error) {
+                        chatBox.removeChild(typingIndicator);
+                        let botError = document.createElement("div");
+                        botError.className = "bot-message";
+                        botError.textContent = "Error connecting to server.";
+                        botError.style.animation = "fadeIn 0.5s ease-in-out";
+                        chatBox.appendChild(botError);
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                    }
+                }, 1000);
+            }, 500);
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("chatBox").innerHTML = `<div class="bot-message">Welcome to Chatbot! How can I help you?</div>`;
+        });
+    </script>
+</body>
+</html>
