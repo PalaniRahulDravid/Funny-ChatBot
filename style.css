@@ -115,6 +115,10 @@ button:hover {
     color: white;
 }
 
+.dark-mode .chat-icon {
+    filter: invert(1);
+}
+
 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
